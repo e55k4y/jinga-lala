@@ -1,0 +1,582 @@
+<!DOCTYPE HTML PUBLIC >
+<html>
+<head>
+
+<title>Drag and Drop</title>
+<meta http-equiv="content-type" content="text/html; charset="ISO-8859-1">
+<meta http-equiv="content-script-type" content="text/javascript">
+<meta http-equiv="content-style-type" content="text/css">
+
+<style type="text/css">
+.dragclass{
+position : relative;
+cursor : move;
+}
+.custom-menu {
+    position: relative;
+    background-color:#C0C0C0;
+    border: 1px solid black;
+    padding: 2px;
+}
+</style>
+
+<script src="/js/socket.io.js"></script>
+<script type="text/javascript" src="/js/jquery-2.0.2.js"></script>
+<script type="text/javascript" src="/js/jquery.contextMenu.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.position.js"></script>
+
+<link href="/js/jquery.contextMenu.css" rel="stylesheet" type="text/css" />    
+	
+<script>
+  
+  jQuery(document).ready(function(){
+   $(document).dblclick(function(e){
+      alert(e.pageX +', '+ e.pageY);
+   }); 
+})
+  
+  var n=500;
+  var m=5;
+  var enblRun=true;
+  
+  var firstx = new Array();
+  var firsty = new Array();
+  var secondx = new Array();
+  var secondy = new Array();
+  var thirdx = new Array();
+  var thirdy = new Array();
+  var fourthx = new Array();
+  var fourthy = new Array();
+  
+//  var newCell = document.getElementById("notifiCell");
+  
+  var socket = io.connect('http://localhost');
+  socket.emit('my other event', {id:'bullshit'});
+  socket.on('jinga',function(data){socket.emit('jinga',{lala:'hu'});});
+
+  socket.on("change",function(data){
+		socket.emit("start",{n:"haha"});
+		socket.on("first",function(data){
+		var d= document.getElementById("1");
+		d.style.left=data.left;
+		firstx.push(parseInt(data.left));
+		d.style.top=data.top;
+		firsty.push(parseInt(data.top));
+		if(data.status=="lock") {
+			d.style.backgroundColor="#0000ff";
+			d.style.zIndex=n++;
+			}
+		});
+		socket.on("second",function(data){
+		var d= document.getElementById("2");
+		d.style.left=data.left;
+		secondx.push(parseInt(data.left));
+		d.style.top=data.top;
+		secondy.push(parseInt(data.top));
+		if(data.status=="lock") {
+			d.style.backgroundColor="#0000ff";
+			d.style.zIndex=n++;
+			}
+		});
+		socket.on("third",function(data){
+		var d= document.getElementById("3");
+		d.style.left=data.left;
+		thirdx.push(parseInt(data.left));
+		d.style.top=data.top;
+		thirdy.push(parseInt(data.top));
+		if(data.status=="lock") {
+			d.style.backgroundColor="#0000ff";
+			d.style.zIndex=n++;
+			}
+		});
+		socket.on("fourth",function(data){
+		var d= document.getElementById("4");
+		d.style.left=data.left;
+		fourthx.push(parseInt(data.left));
+		d.style.top=data.top;
+		fourthy.push(parseInt(data.top));
+		if(data.status=="lock") {
+			d.style.backgroundColor="#0000ff";
+			d.style.zIndex=n++;
+			}
+		});
+	});
+
+  socket.on('new',function(data)
+		{
+			if(enblRun==true){
+			var d=document.getElementById(parseInt(data.id));
+			if(d.id=="1"||d.id=="4")
+      			{
+         			 d.style.backgroundColor="#0000ff";
+      			}
+			d.style.zIndex=n++;
+			d.style.left=data.left;
+			d.style.top=data.top;
+			}
+			var l = parseInt(data.id);
+			var a = parseInt(data.left);
+			var b = parseInt(data.top);
+			if(l==1){
+				firstx.push(a);
+				firsty.push(b);
+				}
+			else if(l==2){
+				secondx.push(a);
+				secondy.push(b);
+				}
+			else if(l==3){
+				thirdx.push(a);
+				thirdy.push(b);
+				}
+			else{
+				fourthx.push(a);
+				fourthy.push(b);
+				}
+			var newCell=document.getElementById("notifiDiv");
+			var newdiv=document.createElement('div');
+			newdiv.id="notif" + m;
+			newdiv.innerHTML="The object " + data.id +" was moved to " + data.left + " , " +data.top;
+			newdiv.setAttribute("style","background-color:#C0C0C0;cursor:pointer;");
+			newdiv.setAttribute("align","bottom");
+			newCell.insertBefore(newdiv,newCell.childNodes[0]);
+			var j = document.getElementById("notif" + m);
+			j.onmouseover=function(){
+				var cone = document.getElementById("myCanvas");
+				var ctxone = cone.getContext("2d");
+				if(data.id==1)ctxone.fillStyle="#C0C0C0";
+				else if(data.id==2)ctxone.fillStyle="#15FF00";
+				else if(data.id==3)ctxone.fillStyle="#FF02F3";
+				else if(data.id==4)ctxone.fillStyle="#00EBFF";
+				ctxone.fillRect(parseInt(data.left)-16,parseInt(data.top)-43,6,6);
+				};
+			j.onmouseout=function(){
+				var ctwo = document.getElementById("myCanvas");
+				var ctxtwo = ctwo.getContext("2d");
+				ctxtwo.clearRect(parseInt(data.left)-16,parseInt(data.top)-43,6,6);
+			};
+			m++;
+		});
+		
+	socket.on("mouseup",function(data){
+				var d = document.getElementById(parseInt(data.unlock));
+				if(d.id=="1"||d.id=="4")
+      			{
+         			 d.style.backgroundColor="#ff0000";
+      			}
+				var newCell=document.getElementById("notifiDiv");
+				var newdiv=document.createElement('div');
+				newdiv.id="notif" + m;
+				newdiv.innerHTML="The object " + data.unlock +" was moved to " + data.left + " , " +data.top;
+				newdiv.setAttribute("style","background-color:#00EBFF;cursor:pointer;");
+				newdiv.setAttribute("align","bottom");
+				newCell.insertBefore(newdiv,newCell.childNodes[0]);
+				var j = document.getElementById("notif" + m);
+				j.onmouseover=function(){
+					var cthre = document.getElementById("myCanvas");
+					var ctxthre = cthre.getContext("2d");
+					ctxthre.clearRect(0,0,1080,610);
+					if(d.id==1)
+					{
+						var arrx= firstx.slice();
+						var arry=firsty.slice();
+						ctxthre.fillStyle="#C0C0C0"; 
+						ctxthre.strokeStyle="#C0C0C0";
+					}
+
+					else if(d.id==2)
+					{
+						var arrx= secondx.slice();
+						var arry= secondy.slice();
+						ctxthre.fillStyle="#15FF00"; 
+						ctxthre.strokeStyle="#15FF00";
+					}
+
+					else if(d.id==3)
+					{
+						var arrx= thirdx.slice();
+						var arry= thirdy.slice();
+						ctxthre.fillStyle="#FF02F3";
+						ctxthre.strokeStyle="#FF02F3";
+					}
+
+					else
+					{
+						var arrx= fourthx.slice();
+						var arry= fourthy.slice();
+						ctxthre.fillStyle="#00EBFF"; 
+						ctxthre.strokeStyle="#00EBFF";
+					}
+
+					var a = parseInt(arrx[0]);
+					var b = parseInt(arry[0]);
+					var l = arrx.length;
+					
+					ctxthre.beginPath();
+					ctxthre.fillRect(a-16,b-43,6,6);
+					ctxthre.moveTo(a-13,b-40);
+					for (var i=0;i<l;i++)
+					{
+						var e = parseInt(arrx[i]);
+						var f = parseInt(arry[i]);
+						ctxthre.lineTo(e-13,f-40);
+					}
+					ctxthre.stroke();
+					ctxthre.closePath();
+					ctxthre.fillRect(e-16,f-43,6,6);
+				};
+				j.onmouseout=function(){
+					var cfour = document.getElementById("myCanvas");
+					var ctxfour = cfour.getContext("2d");
+					ctxfour.clearRect(0,0,parseInt(cfour.width),parseInt(cfour.height));
+				};
+				m++;
+			});	
+		
+if  (document.getElementsByClassName('dragclass')){
+
+(function(){
+
+//var n = 500;
+var dragok = false;
+var y,x,d,dy,dx;
+
+function move(e){
+if (!e) e = window.event;
+ if (dragok){
+  d.style.left = dx + e.clientX - x + "px";
+  d.style.top  = dy + e.clientY - y + "px";
+//  var xyz={left:d.style.left , top:d.style.top};
+  socket.emit("onmousemove",{left:d.style.left,top:d.style.top,id:d.id});
+  return false;
+ }
+}
+
+function down(e){
+if (!e) e = window.event;
+var temp = (typeof e.target != "undefined")?e.target:e.srcElement;
+if (temp.tagName != "HTML"|"BODY" && temp.className != "dragclass"){
+ temp = (typeof temp.parentNode != "undefined")?temp.parentNode:temp.parentElement;
+ }
+if(e.button==0){
+if (temp.className == "dragclass")
+{
+ dragok = true;
+ temp.style.zIndex = n++;
+ d = temp;
+ dx = parseInt(temp.style.left+0);
+ dy = parseInt(temp.style.top+0);
+ x = e.clientX;
+ y = e.clientY;
+ socket.emit("onmousedown",{lock:d.id});
+ socket.on("ok",function(data){
+ if (parseInt(data.lock)==d.id) {  
+		if(d.id=="1"||d.id=="4")
+      		{
+          		d.style.backgroundColor="#0000ff";
+      		}
+	document.onmousemove = move;
+	}
+ });
+ return false;
+ }
+ }
+
+else{
+if (temp.className == "dragclass")
+{
+	$(".dragclass").bind("contextmenu", function(event) { 
+		event.preventDefault();
+		$.contextMenu({
+		selector:'.dragclass',
+		className:'custom-menu',
+        build: function($trigger, event) {
+            return {
+//                callback: function(key, options) {
+//					var m = event.pageX; alert(m);
+//                    $("#" +parseInt(key)).css("zIndex",n++);
+//                },
+                items: {
+                    "1": {name: "1", callback:function(key,options){
+						var a = event.pageX;
+						var b = parseInt($("#1").css("left"));
+						var c = event.pageY;
+						var d = parseInt($("#1").css("top"));
+						if(a >= b && a < (b+150) && c >=d && c < (d+20))
+						{$("#1").css("zIndex",n++);
+						return true;}
+						else {$.disableContextMenuItems("#1");}
+						}},
+                    "2": {name: "2", callback:function(key,options){
+						var a = event.pageX;
+						var b = parseInt($("#2").css("left"));
+						var c = event.pageY;
+						var d = parseInt($("#2").css("top"));
+						if(a >= b && a < (b+150) && c >=d && c < (d+100))
+						{$("#2").css("zIndex",n++);
+						return true;}
+						else {$.disableContextMenuItems("#2");}
+						}},
+                    "3": {name: "3", callback:function(key,options){
+						var a = event.pageX;
+						var b = parseInt($("#3").css("left"));
+						var c = event.pageY;
+						var d = parseInt($("#3").css("top"));
+						if(a >= b && a < (b+150) && c >=d && c < (d+105))
+						{$("#3").css("zIndex",n++);
+						return true;}
+						else {$.disableContextMenuItems("#3");}
+						}},
+                    "4": {name: "4", callback:function(key,options){
+						var a = event.pageX;
+						var b = parseInt($("#4").css("left"));
+						var c = event.pageY;
+						var d = parseInt($("#4").css("top"));
+						if(a >= b && a < (b+150) && c >=d && c < (d+20))
+						{$("#4").css("zIndex",n++);
+						return true;}
+						else {$.disableContextMenuItems("#4");}
+						}},
+                    "sep1": "---------",
+                    "quit": {name: "Quit",callback:function(key,options){$("#" +parseInt(key)).css("zIndex",n++);}}
+                }
+            };
+        }
+    });
+	
+	});
+	$(document).bind("click", function(event) {$("div.custom-menu").hide();});
+}}
+}
+
+function up(e){
+	if (!e) e = window.event;
+	var temp = (typeof e.target != "undefined")?e.target:e.srcElement;
+	if (temp.tagName != "HTML"|"BODY" && temp.className != "dragclass"){
+	temp = (typeof temp.parentNode != "undefined")?temp.parentNode:temp.parentElement;
+	}
+	dragok = false;
+	document.onmousemove = null;
+	if (temp.className == "dragclass")
+	{
+	if(d.id=="1"||d.id=="4")
+      {
+          d.style.backgroundColor="#ff0000";
+      }
+	socket.emit("onmouseup",{unlock:d.id,left:d.style.left,top:d.style.top});
+	}
+}
+
+document.onmousedown = down;
+document.onmouseup = up;
+
+})();
+}
+
+function RuntimeUpdate(event)
+	{
+		var doc=document.getElementById("enblbtn");
+		if(enblRun==true)
+		{
+			enblRun=false;
+			doc.value="Enable";
+		}
+		else
+		{
+			enblRun=true;
+			doc.value="Disable";
+		}
+	}
+
+function DrawPath(event){
+	var cfive = document.getElementById("myCanvas");
+	var ctxfive = cfive.getContext("2d");
+	ctxfive.beginPath();
+	ctxfive.strokeStyle="#000000";
+//	ctx.moveTo(0,0);
+//	ctx.lineTo(-200,-100);
+//	ctx.stroke();
+	var d = document.getElementById("1");
+	var a = parseInt(firstx[0]);
+	var b = parseInt(firsty[0]);
+	var bl = firstx.length;
+	for (var i=0;i<bl;i++)
+	{
+		if (i==0||i==(bl-1))
+		{
+			ctxfive.fillStyle="#C0C0C0";
+			ctxfive.fillRect(a-13,b-40,5,5);
+		}
+		var e = parseInt(firstx[i]);
+		var f = parseInt(firsty[i]);
+		ctxfive.moveTo(a-13,b-40);
+		ctxfive.lineTo(e-13,f-40);
+		ctxfive.stroke();
+		a = e ; b = f;
+	}
+	d = document.getElementById("2");
+	a = parseInt(secondx[0]);
+	b = parseInt(secondy[0]);
+	bl = secondx.length;
+	for (var i=0;i<bl;i++)
+	{
+		if (i==0||i==(bl-1))
+		{
+			ctxfive.fillStyle="#C0C0C0";
+			ctxfive.fillRect(a-13,b-40,5,5);
+		}
+		var e = parseInt(secondx[i]);
+		var f = parseInt(secondy[i]);
+		ctxfive.moveTo(a-13,b-40);
+		ctxfive.lineTo(e-13,f-40);
+		ctxfive.stroke();
+		a = e ; b = f;
+	}
+	d = document.getElementById("3");
+	a = parseInt(thirdx[0]);
+	b = parseInt(thirdy[0]);
+	bl = thirdx.length;
+	for (var i=0;i<bl;i++)
+	{
+		if (i==0||i==(bl-1))
+		{
+			ctxfive.fillStyle="#C0C0C0";
+			ctxfive.fillRect(a-13,b-40,5,5);
+		}
+		var e = parseInt(thirdx[i]);
+		var f = parseInt(thirdy[i]);
+		ctxfive.moveTo(a-13,b-40);
+		ctxfive.lineTo(e-13,f-40);
+		ctxfive.stroke();
+		a = e ; b = f;
+	}
+	d = document.getElementById("4");
+	a = parseInt(fourthx[0]);
+	b = parseInt(fourthy[0]);
+	bl = fourthx.length;
+	for (var i=0;i<n;i++)
+	{
+		if (i==0||i==(bl-1))
+		{
+			ctxfive.fillStyle="#C0C0C0";
+			ctxfive.fillRect(a-13,b-40,5,5);
+		}
+		var e = parseInt(fourthx[i]);
+		var f = parseInt(fourthy[i]);
+		ctxfive.moveTo(a-13,b-40);
+		ctxfive.lineTo(e-13,f-40);
+		ctxfive.stroke();
+		a = e ; b = f;
+	}
+	ctxfive.closePath();
+}	
+
+function Clear(event)
+{
+	var csix = document.getElementById('myCanvas');
+    var ctxsix = csix.getContext('2d');
+	ctxsix.clearRect(0, 0, csix.width, csix.height);
+}
+
+function Update(event)
+{
+	var d = document.getElementById("1");
+	d.style.left = firstx.pop() + "px";
+	d.style.top = firsty.pop() + "px";
+	firstx = new Array();
+	firstx.push(parseInt(d.style.left));
+	firsty = new Array();
+	firsty.push(parseInt(d.style.top));
+	d = document.getElementById("2");
+	d.style.left = secondx.pop() + "px";
+	d.style.top = secondy.pop() + "px";
+	secondx = new Array();
+	secondx.push(parseInt(d.style.left));
+	secondy = new Array();
+	secondy.push(parseInt(d.style.top));
+	d = document.getElementById("3");
+	d.style.left = thirdx.pop() + "px";
+	d.style.top = thirdy.pop() + "px";
+	thirdx = new Array();
+	thirdx.push(parseInt(d.style.left));
+	thirdy = new Array();
+	thirdy.push(parseInt(d.style.top));
+	d = document.getElementById("4");
+	d.style.left = fourthx.pop() + "px";
+	d.style.top = fourthy.pop() + "px";
+	fourthx = new Array();
+	fourthx.push(parseInt(d.style.left));
+	fourthy = new Array();
+	fourthy.push(parseInt(d.style.top));
+}
+
+function clearNotifi(event)
+{
+	var nl = m;
+	m=5;
+	for(var i=5;i<nl;i++)
+	{
+		var not = document.getElementById("notif" + i);
+//		alert("Hi");
+		var newCell = document.getElementById("notifiDiv");
+		if (not.style.backgroundColor=="rgb(192, 192, 192)")
+		{
+			newCell.removeChild(not);
+		}
+		else
+		{
+			not.id="notif" + m++;
+		}
+	}
+}
+</script>
+
+</head>
+<body>
+
+<table width="1350" height="650" border="1"style="table>
+<tr height = "25">
+<td>
+<div align="right"> <input type= "button" id="enblbtn" value='Disable' onclick = 'RuntimeUpdate()' style="position:absolute;top:10px;left:1025px;
+	background-color:#C0C0C0;"></input></div>
+	
+<div align="right"> <input type= "button" value='Show Path' onclick = 'DrawPath()' style="position:absolute;top:10px;left:935px;
+	background-color:#C0C0C0;"></input></div>
+
+<div align="right"> <input type= "button" value='Clear' onclick = 'Clear()' style="position:absolute;top:10px;left:878px;
+	background-color:#C0C0C0;"></input></div>	
+	
+<div align="right"> <input type= "button" value='Update' onclick = 'Update()' style="position:absolute;top:10px;left:810px;
+	background-color:#C0C0C0;"></input></div>	
+
+</td>
+<td>
+<div align="right"> <input type= "button" id="enblbtn" value='Clear Notifications' onclick = 'clearNotifi()' style="position:absolute;top:10px;left:1165px;
+	background-color:#C0C0C0;"></input></div>
+</td>
+</tr>
+<tr>
+<td width="80%" height="620">
+<div id="1" class="dragclass" style="position:absolute;height:20px;width:150px;top:250px;left:40px;background-color:#ff0000;color:#ffffff">
+Div: Relative position
+</div>
+
+<img id="2" src="/images.jpg" class="dragclass" style="position:absolute;top:300px;left:200px;height:100px;width:150px;padding:0px"/>
+
+<img id="3" src="/images.jpg" class="dragclass" style="position:absolute;top:400px;left:200px;height:105px;width:150px;padding:0px"/>
+
+<div id="4" class="dragclass" style="position:absolute;top:330px;left:160px;height:20px;width:150px;background-color:#ff0000;color:#ffffff" >
+Div: Absolute position
+</div>
+<canvas id="myCanvas" width ="1080" height="610" style="border:1px solid #d3d3d3;">
+</canvas>
+</td>
+<td width="20%" height="620" id="notifiCell">
+<div id="notifiDiv" style="overflow:scroll; width:100% ;height:100%">
+</div>
+</td>
+</tr>
+</table>
+
+</body>
+</html>
